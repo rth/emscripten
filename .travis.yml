@@ -29,6 +29,13 @@ install:
 script:
   - set -o errexit
   - flake8
+  - |
+      echo ${TRAVIS_BRANCH};
+      # run flake8 on the git diff for PRs targeting the incoming branch
+      if  [[ "${TRAVIS_BRANCH}" == "incoming" ]] && [[ "${TRAVIS_PULL_REQUEST}" != false ]]; then
+         git fetch origin incoming
+         git diff -u incoming...HEAD | flake8 --diff --show-source --config=/dev/null --ignore=E111,E114,E501
+      fi
   - echo $TEST_TARGET
   - docker build --build-arg TEST_TARGET="$TEST_TARGET" .
 
